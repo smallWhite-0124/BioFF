@@ -8,12 +8,12 @@ build-backend = "setuptools.build_meta"
 name = "BioFF"
 version = "0.1.0"
 authors = [
-  { name="smallwhite", email="180044072@qq.com.com" }
+  { name="smallwhite", email="180044072@qq.com" }
 ]
 description = "基于Forward-Forward算法的生物信息学分类工具（适配基因/蛋白质表达数据）"
 long_description = file: "README.md"  # 关联README.md作为长描述（PyPI展示）
 long_description_content_type = "text/markdown"
-license = { file="LICENSE" }
+license = { file = "LICENSE" }
 keywords = [
   "bioinformatics", "Forward-Forward", "classification",
   "gene expression", "protein expression", "pytorch"
@@ -39,8 +39,6 @@ dependencies = [
   "scikit-learn >= 1.0.0",
   "tqdm >= 4.64.0"
 ]
-
-# 项目链接（替换为你的GitHub仓库地址）
 [project.urls]
-"Homepage" = "https://github.com/你的GitHub用户名/bioff"
-"Bug Tracker" = "https://github.com/你的GitHub用户名/bioff/issues"
+"Homepage" = "https://github.com/smallWhite-0124/BioFF"
+"Bug Tracker" = "https://github.com/smallWhite-0124/bioff/issues"
