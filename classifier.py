@@ -3,7 +3,7 @@ import torch
 import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.metrics import accuracy_score  #  修复导入规范
-from BioFF.core import Net, overlay_y_on_x, get_device
+from core import Net, overlay_y_on_x, get_device
 
 
 class BioFFClassifier(BaseEstimator, ClassifierMixin):
