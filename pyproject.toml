@@ -10,7 +10,7 @@ authors = [
 ]
 description = "基于Forward-Forward算法的生物信息学分类工具（适配基因/蛋白质表达数据）"
 readme = "README.md"
-license = { file = "LICENSE" }
+license = "MIT"
 keywords = [
   "bioinformatics",
   "Forward-Forward",
