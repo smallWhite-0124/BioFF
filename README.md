@@ -1,6 +1,16 @@
 BioFF
 BioFF (Bioinformatics Forward-Forward) is a classification tool tailored for bioinformatics tasks (e.g., normal/tumor sample classification) based on the Forward-Forward algorithm, optimized for gene/protein expression data.
 Installation
+
+# Acknowledgements & Open Source Credits
+The core implementation and code structure of this project are based on the open-source repository below. We sincerely thank the original author for their contributions:
+- Repository Name: pytorch_forward_forwar
+
+Author: mpezeshki
+        
+Repository URL: https://github.com/mpezeshki/pytorch_forward_forwar
+Notes
+This project is developed and improved based on the aforementioned open-source repository, following open-source protocols and respecting the original author's work.
 bash
 运行
 # Source code installation
