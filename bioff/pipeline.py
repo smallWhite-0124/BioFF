@@ -10,13 +10,15 @@ from .preprocess import (
 from sklearn.metrics import classification_report, confusion_matrix
 import numpy as np
 
-
 def run_prediction(
-        good_path: str,
-        bad_path: str,
+        good_path: str = None,
+        bad_path: str = None,
+        data_path: str = None,          # 新增：单文件路径
+        label_col: int = -1,            # 新增：标签所在列（默认最后一列）
+        pos_label: int = 0,             # 新增：正样本的标签值
         # 保留核心预处理/模型参数，移除高变异基因相关
         scale_method: str = "zscore",
-        missing_fill_method: str = "median",  # 生信默认中位数（抗极端值）
+        missing_fill_method: str = "median",
         test_size: float = 0.2,
         # 模型超参数透传
         hidden_dim: int = 256,
@@ -46,6 +48,29 @@ def run_prediction(
         results: 字典，包含准确率、分类报告、混淆矩阵、预测值、真实值
     """
     # 1. 加载数据（增加异常捕获）
+        """
+    生信数据Forward-Forward分类一键预测接口
+    ...
+    """
+    # ========== 新增：单文件自动拆分 ==========
+    if data_path is not None:
+        import tempfile
+        data = np.loadtxt(data_path)
+        X = data[:, :-1]
+        # 提取标签列（支持负数索引）
+        y = data[:, label_col]
+        # 拆分正负样本
+        pos_mask = (y == pos_label)
+        X_good = X[pos_mask]
+        X_bad = X[~pos_mask]
+        # 保存为临时文件，供原有 load_good_bad_data 使用
+        f_good = tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False)
+        np.savetxt(f_good, X_good)
+        good_path = f_good.name
+        f_bad = tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False)
+        np.savetxt(f_bad, X_bad)
+        bad_path = f_bad.name
+    # ========== 新增结束 ==========
     try:
         X, y = load_good_bad_data(good_path, bad_path)
     except FileNotFoundError:
