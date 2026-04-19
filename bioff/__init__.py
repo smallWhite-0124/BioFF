@@ -1,4 +1,4 @@
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 # 导出核心类/函数（移除高变异基因筛选相关）
 from .classifier import BioFFClassifier
 from .pipeline import run_prediction
