@@ -1,4 +1,4 @@
-# classifier.py 改造后
+
 import torch
 import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
@@ -8,8 +8,8 @@ from .core import Net, overlay_y_on_x, get_device
 
 class BioFFClassifier(BaseEstimator, ClassifierMixin):
     #  开放所有核心超参数，设生信友好默认值
-    def __init__(self, hidden_dim=256, lr=0.01, threshold=2.0, num_epochs=500, random_state=42):
-        self.hidden_dim = hidden_dim
+    def __init__(self, hidden_dims=[256,128], lr=0.01, threshold=2.0, num_epochs=500, random_state=42):
+        self.hidden_dims = hidden_dims
         self.lr = lr
         self.threshold = threshold
         self.num_epochs = num_epochs
@@ -31,8 +31,11 @@ class BioFFClassifier(BaseEstimator, ClassifierMixin):
         #  透传超参数到Net
         self.model = Net(
             input_dim=input_dim,
-            hidden_dim=self.hidden_dim,
-            device=self.device
+            hidden_dims=self.hidden_dims,
+            device=self.device,
+            lr=self.lr,
+            threshold=self.threshold,
+            num_epochs=self.num_epochs
         )
         # 数据转tensor并适配设备
         X_tensor = torch.tensor(X, dtype=torch.float32).to(self.device)
