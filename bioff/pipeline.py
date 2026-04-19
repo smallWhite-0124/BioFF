@@ -54,15 +54,15 @@ def run_prediction(
     """
     # ========== 新增：单文件自动拆分 ==========
     if data_path is not None:
-    import tempfile
-    data = np.loadtxt(data_path)
-    X = data[:, :-1]
-    # 提取标签列（支持负数索引）
-    y = data[:, label_col]
-    # 拆分正负样本
-    pos_mask = (y == pos_label)
-    X_good = X[pos_mask]
-    X_bad = X[~pos_mask]
+        import tempfile
+        data = np.loadtxt(data_path)
+        X = data[:, :-1]
+        # 提取标签列（支持负数索引）
+        y = data[:, label_col]
+        # 拆分正负样本
+        pos_mask = (y == pos_label)
+        X_good = X[pos_mask]
+        X_bad = X[~pos_mask]
         
     # 检查是否为空
     if len(X_good) == 0:
