@@ -45,14 +45,18 @@ class Layer(nn.Linear):
         return self.forward(x_pos).detach(), self.forward(x_neg).detach()
 
 class Net(nn.Module):
-    # 开放hidden_dim，设备适配
-    def __init__(self, input_dim, hidden_dim=256, device=None):
+    def __init__(self, input_dim, hidden_dims=[256, 128], device=None):
         super().__init__()
         self.device = device or get_device()
-        self.layers = nn.ModuleList([
-            Layer(input_dim, hidden_dim, device=self.device),
-            Layer(hidden_dim, hidden_dim, device=self.device)
-        ])
+        
+        # 动态构建隐藏层
+        layers = []
+        prev_dim = input_dim
+        for h_dim in hidden_dims:
+            layers.append(Layer(prev_dim, h_dim, device=self.device))
+            prev_dim = h_dim
+        # 注意：这里不加输出层，沿用原 FF 的 Goodness 投票分类方式
+        self.layers = nn.ModuleList(layers)
 
     def predict(self, x, num_classes):
         x = x.to(self.device)
