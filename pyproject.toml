@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "BioFF"
-version = "0.2.7"
+version = "1.0.0"
 authors = [
   { name = "smallwhite", email = "180044072@qq.com" }
 ]
