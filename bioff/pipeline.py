@@ -21,7 +21,7 @@ def run_prediction(
         missing_fill_method: str = "median",
         test_size: float = 0.2,
         # 模型超参数透传
-        hidden_dim: int = 256,
+        hidden_dims: list = [256,128],
         lr: float = 0.01,
         threshold: float = 2.0,
         num_epochs: int = 500,
@@ -59,7 +59,7 @@ def run_prediction(
         X = data[:, :-1]
         # 提取标签列（支持负数索引）
         y = data[:, label_col]
-        # 拆分正负样本
+    # 拆分正负样本
         pos_mask = (y == pos_label)
         X_good = X[pos_mask]
         X_bad = X[~pos_mask]
@@ -102,7 +102,7 @@ def run_prediction(
 
     # 4. 训练模型（透传超参数）
     model = BioFFClassifier(
-        hidden_dim=hidden_dim,
+        hidden_dims=hidden_dims,
         lr=lr,
         threshold=threshold,
         num_epochs=num_epochs,
