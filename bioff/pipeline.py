@@ -53,7 +53,7 @@ def run_prediction(
     ...
     """
     # ========== 新增：单文件自动拆分 ==========
-    if data_path is not None:
+        if data_path is not None:
         import tempfile
         data = np.loadtxt(data_path)
         X = data[:, :-1]
@@ -63,12 +63,25 @@ def run_prediction(
         pos_mask = (y == pos_label)
         X_good = X[pos_mask]
         X_bad = X[~pos_mask]
-        # 保存为临时文件，供原有 load_good_bad_data 使用
+        
+        # 检查是否为空
+        if len(X_good) == 0:
+            raise ValueError("未找到正样本，请检查 pos_label 设置")
+        if len(X_bad) == 0:
+            raise ValueError("未找到负样本，请检查标签分布")
+        
+        # 创建带标签的数据：正样本标签为0，负样本标签为1（与原 load_good_bad_data 约定一致）
+        y_good = np.zeros((X_good.shape[0], 1))
+        y_bad = np.ones((X_bad.shape[0], 1))
+        data_good = np.hstack([X_good, y_good])
+        data_bad = np.hstack([X_bad, y_bad])
+        
+        # 保存为临时文件
         f_good = tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False)
-        np.savetxt(f_good, X_good)
+        np.savetxt(f_good, data_good)
         good_path = f_good.name
         f_bad = tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False)
-        np.savetxt(f_bad, X_bad)
+        np.savetxt(f_bad, data_bad)
         bad_path = f_bad.name
     # ========== 新增结束 ==========
     try:
