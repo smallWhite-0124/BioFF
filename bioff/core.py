@@ -46,24 +46,30 @@ class Layer(nn.Linear):
 
 
 class Net(nn.Module):
-    def __init__(self, input_dim, hidden_dims=[256, 128], device=None,lr=0.01, threshold=2.0, num_epochs=500):
+    def __init__(self, input_dim, hidden_dims=[256, 128], device=None, num_classes=2,
+                 lr=0.01, threshold=2.0, num_epochs=500):
         super().__init__()
         self.device = device or get_device()
+        self.num_classes = num_classes
+
+        # 拼接 One-Hot 后的真实输入维度
+        actual_input_dim = input_dim + num_classes
 
         # 动态构建隐藏层
         layers = []
-        prev_dim = input_dim
+        prev_dim = actual_input_dim
         for h_dim in hidden_dims:
-            layers.append(Layer(prev_dim, h_dim, device=self.device,lr=lr, threshold=threshold, num_epochs=num_epochs))
+            layers.append(Layer(prev_dim, h_dim, device=self.device,
+                                lr=lr, threshold=threshold, num_epochs=num_epochs))
             prev_dim = h_dim
-        # 注意：这里不加输出层，沿用原 FF 的 Goodness 投票分类方式
         self.layers = nn.ModuleList(layers)
 
     def predict(self, x, num_classes):
         x = x.to(self.device)
         goodness_per_label = []
         for label in range(num_classes):
-            h = overlay_y_on_x(x, label, num_classes)
+            y = torch.full((x.size(0),), label, device=self.device, dtype=torch.long)
+            h = inject_label(x, y, num_classes)
             goodness = []
             for layer in self.layers:
                 h = layer(h)
@@ -78,8 +84,16 @@ class Net(nn.Module):
             print('training layer', i, '...')
             h_pos, h_neg = layer.train(h_pos, h_neg)
 
-def overlay_y_on_x(x, y, num_classes):
-    x_ = x.clone()
-    x_[:, :num_classes] *= 0.0
-    x_[range(x.shape[0]), y] = x.max()
-    return x_
+def inject_label(x, y, num_classes):
+    """
+    将标签以 One-Hot 形式拼接到输入特征末尾。
+    输入：
+        x: (batch_size, input_dim)
+        y: (batch_size,)
+        num_classes: 类别数
+    返回：
+        (batch_size, input_dim + num_classes)
+    """
+    y_onehot = torch.zeros(x.size(0), num_classes, device=x.device, dtype=x.dtype)
+    y_onehot[range(x.size(0)), y] = 1.0
+    return torch.cat([x, y_onehot], dim=1)
