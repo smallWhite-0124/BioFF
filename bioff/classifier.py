@@ -1,9 +1,9 @@
-
+# classifier.py 改造后
 import torch
 import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.metrics import accuracy_score  #  修复导入规范
-from .core import Net, overlay_y_on_x, get_device
+from .core import Net, inject_label, get_device
 
 
 class BioFFClassifier(BaseEstimator, ClassifierMixin):
@@ -33,6 +33,7 @@ class BioFFClassifier(BaseEstimator, ClassifierMixin):
             input_dim=input_dim,
             hidden_dims=self.hidden_dims,
             device=self.device,
+            num_classes=self.num_classes,  # 新增
             lr=self.lr,
             threshold=self.threshold,
             num_epochs=self.num_epochs
@@ -41,8 +42,11 @@ class BioFFClassifier(BaseEstimator, ClassifierMixin):
         X_tensor = torch.tensor(X, dtype=torch.float32).to(self.device)
         y_tensor = torch.tensor(y, dtype=torch.long).to(self.device)
 
-        x_pos = overlay_y_on_x(X_tensor, y_tensor, self.num_classes)
-        x_neg = overlay_y_on_x(X_tensor, y_tensor[torch.randperm(X_tensor.size(0))], self.num_classes)
+        # 正样本：直接拼接标签 0
+        x_pos = inject_label(X_tensor, y_tensor, self.num_classes)
+        # 负样本：打乱标签后再拼接（标签不再是真实标签，模拟负样本）
+        shuffled_y = y_tensor[torch.randperm(X_tensor.size(0))]
+        x_neg = inject_label(X_tensor, shuffled_y, self.num_classes)
         self.model.train(x_pos, x_neg)
 
     def predict(self, X):
