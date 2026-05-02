@@ -29,8 +29,14 @@ from bioff import run_prediction
 
 # Core call
 model, results = run_prediction(
-    good_path="good_samples.txt",
-    bad_path="bad_samples.txt"
+    data_path="pbmc3k_cd4_cd8.txt",
+    label_col=-1,
+    pos_label=0,
+    hidden_dims=[256,128],        
+    threshold=1.5,
+    num_epochs=1000,         
+    lr=0.01,
+    reweight_gamma = 1.1 
 )
 
 # Check accuracy
