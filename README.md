@@ -29,7 +29,7 @@ from bioff import run_prediction
 
 # Core call
 model, results = run_prediction(
-    data_path="pbmc3k_cd4_cd8.txt",
+    data_path="data_path",
     label_col=-1,
     pos_label=0,
     hidden_dims=[256,128],        
