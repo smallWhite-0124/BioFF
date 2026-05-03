@@ -7,7 +7,7 @@ from .core import Net, inject_label, get_device
 
 class BioFFClassifier(BaseEstimator, ClassifierMixin):
     #  开放所有核心超参数，设生信友好默认值
-    def __init__(self, hidden_dims=[256,128], lr=0.01, threshold=2.0, num_epochs=500, random_state=42,reweight_gamma=0.5):
+    def __init__(self, hidden_dims=[256,128], lr=0.01, threshold=2.0, num_epochs=500, random_state=42,reweight_gamma=0.5,contrast_weight=1.0):
         self.hidden_dims = hidden_dims
         self.lr = lr
         self.threshold = threshold
@@ -17,6 +17,7 @@ class BioFFClassifier(BaseEstimator, ClassifierMixin):
         self.num_classes = None
         self.device = get_device()
         self.reweight_gamma = reweight_gamma
+        self.contrast_weight = contrast_weight
         torch.manual_seed(random_state)
 
     def fit(self, X, y):
@@ -36,7 +37,8 @@ class BioFFClassifier(BaseEstimator, ClassifierMixin):
             num_classes=self.num_classes,  # 新增
             lr=self.lr,
             threshold=self.threshold,
-            num_epochs=self.num_epochs
+            num_epochs=self.num_epochs,
+            contrast_weight=self.contrast_weight
         )
 
         X_tensor = torch.tensor(X, dtype=torch.float32)  # 去掉了 .to(self.device)，后面在 model.train 内部会转移
