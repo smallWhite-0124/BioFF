@@ -26,6 +26,7 @@ def run_prediction(
         threshold: float = 2.0,
         num_epochs: int = 500,
         reweight_gamma: float = 0.5,
+        contrast_weight: float = 1.0,
         random_state: int = 42
 ):
     """
@@ -76,7 +77,8 @@ def run_prediction(
     y_bad = np.ones((X_bad.shape[0], 1))
     data_good = np.hstack([X_good, y_good])
     data_bad = np.hstack([X_bad, y_bad])
-    
+        
+    # 保存为临时文件
     f_good = tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False)
     np.savetxt(f_good, data_good)
     good_path = f_good.name
@@ -107,7 +109,8 @@ def run_prediction(
         threshold=threshold,
         num_epochs=num_epochs,
         random_state=random_state,
-        reweight_gamma=reweight_gamma
+        reweight_gamma=reweight_gamma,
+        contrast_weight=contrast_weight
     )
     model.fit(X_train, y_train)
 
@@ -117,6 +120,7 @@ def run_prediction(
     cls_report = classification_report(y_test, y_pred, output_dict=True)
     conf_mat = confusion_matrix(y_test, y_pred)
 
+    # 打印友好输出
     print(f"\n===== 生信分类预测结果 =====")
     print(f"测试集准确率: {acc:.4f}")
     print(f"使用归一化方法: {scale_method}")
