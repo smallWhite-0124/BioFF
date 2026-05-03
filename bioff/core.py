@@ -7,19 +7,21 @@ import torch.nn as nn
 from tqdm import tqdm
 from torch.optim import Adam
 
+# 新增：设备自动检测函数
 def get_device():
     return torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class Layer(nn.Linear):
-    # 开放超参数：lr、threshold、num_epochs，
+    # 开放超参数：lr、threshold、num_epochs，设生信友好默认值
     def __init__(self, in_features, out_features, bias=True, device=None, dtype=None,
-                 lr=0.01, threshold=2.0, num_epochs=500):  # 生信小样本默认调小lr/epochs
+                 lr=0.01, threshold=2.0, num_epochs=500,contrast_weight=1.0):  # 生信小样本默认调小lr/epochs
         super().__init__(in_features, out_features, bias, device, dtype)
         self.relu = nn.ReLU()
         self.lr = lr
         self.opt = Adam(self.parameters(), lr=self.lr)
         self.threshold = threshold
         self.num_epochs = num_epochs
+        self.contrast_weight = contrast_weight
         self.device = get_device()  # 设备适配
 
     def forward(self, x):
@@ -39,8 +41,9 @@ class Layer(nn.Linear):
 
             # 将原来的联合损失拆分成两项，分别施加样本权重
             loss_pos = sample_weights * torch.log(1 + torch.exp(-g_pos + self.threshold))
-            loss_neg = sample_weights * torch.log(1 + torch.exp(g_neg - self.threshold))
-            loss = (loss_pos + loss_neg).mean()
+            loss_neg = sample_weights * torch.log(1 + torch.exp(g_neg - self.threshold+0.2))
+            loss_contrast = sample_weights * torch.log(1 + torch.exp(1*(g_neg - g_pos )))
+            loss = (loss_pos + loss_neg + self.contrast_weight * loss_contrast).sum() / sample_weights.sum()
 
             self.opt.zero_grad()
             loss.backward()
@@ -50,7 +53,7 @@ class Layer(nn.Linear):
 
 class Net(nn.Module):
     def __init__(self, input_dim, hidden_dims=[256, 128], device=None, num_classes=2,
-                 lr=0.01, threshold=2.0, num_epochs=500):
+                 lr=0.01, threshold=2.0, num_epochs=500,contrast_weight=1.0):
         super().__init__()
         self.device = device or get_device()
         self.num_classes = num_classes
@@ -63,7 +66,7 @@ class Net(nn.Module):
         prev_dim = actual_input_dim
         for h_dim in hidden_dims:
             layers.append(Layer(prev_dim, h_dim, device=self.device,
-                                lr=lr, threshold=threshold, num_epochs=num_epochs))
+                                lr=lr, threshold=threshold, num_epochs=num_epochs,contrast_weight=contrast_weight))
             prev_dim = h_dim
         self.layers = nn.ModuleList(layers)
 
